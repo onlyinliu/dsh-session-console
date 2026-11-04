@@ -1,6 +1,6 @@
 {
   "name": "dsh-session-console",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Session Console: a dashboard over every session in the sidebar, natural-language session targeting, and a dispatch entry that turns a sentence into a task on another conversation.",
   "license": "MIT",
@@ -66,7 +66,7 @@
   },
   "engines": {
     "node": ">=18",
-    "dsh": ">=0.2.0-rc.2 <0.2.2-0"
+    "dsh": ">=0.2.0-rc.2 <0.3.0-0"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1 || >=4.0.5-0 <5",
