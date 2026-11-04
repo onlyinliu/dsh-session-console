@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Session Console (dsh-session-console)",
+    "description": "Sidebar session administrator: a dashboard over every conversation (status, token spend, heat, health), natural-language session targeting, and a dispatch box that turns one sentence into a queued task on another conversation."
+  }
+}
