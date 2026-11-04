@@ -66,6 +66,11 @@ plugin_manager install_bundle  target=D:\create\dsh-session-console
 
 装完重开一次 DSH，侧栏才会出现图标。
 
+> **如果按包名装时报 `declares no dsh.bundle`**：那是镜像还没同步到 `0.1.0`，
+> 解析到了 npm 侧发布时留下的 `0.0.0-stage` 占位版本（它没有 `dsh` 字段）。
+> 两种解法：把安装源切到 **npm 官方源**，或者改用 `github:onlyinliu/dsh-session-console`。
+> 镜像同步后重试即可（`registry.npmmirror.com/dsh-session-console` 的 `latest` 应为 `0.1.0`）。
+
 ## 发布状态
 
 | 渠道 | 状态 |
