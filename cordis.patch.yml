@@ -1,0 +1,3 @@
+- insert:
+    - id: session-console
+      name: 'dsh-session-console'
