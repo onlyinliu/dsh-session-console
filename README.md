@@ -66,17 +66,51 @@ plugin_manager install_bundle  target=D:\create\dsh-session-console
 
 装完重开一次 DSH，侧栏才会出现图标。
 
-> **如果按包名装时报 `declares no dsh.bundle`**：那是镜像还没同步到 `0.1.0`，
+> **如果按包名装时报 `declares no dsh.bundle`**：那是镜像还没同步到最新版，
 > 解析到了 npm 侧发布时留下的 `0.0.0-stage` 占位版本（它没有 `dsh` 字段）。
 > 两种解法：把安装源切到 **npm 官方源**，或者改用 `github:onlyinliu/dsh-session-console`。
-> 镜像同步后重试即可（`registry.npmmirror.com/dsh-session-console` 的 `latest` 应为 `0.1.0`）。
+> 镜像同步后重试即可（`registry.npmmirror.com/dsh-session-console` 的 `latest` 应为 `0.1.1`）。
+
+> **如果装的时候报 `incompatible-version`（界面上的「与当前 DSH 版本不兼容」）**：装到的是 `0.1.0`。
+> 它的 `engines.dsh` 写成了 `>=0.2.0-rc.2 <0.2.2-0`，而按 semver 预发布规则 `0.2.2-rc.1` **大于** `0.2.2-0`，
+> 于是被 DSH 判成不兼容。`0.1.1` 已把上界放宽到 `<0.3.0-0`。
+
+### 兼容性（`engines.dsh` 为什么这么写）
+
+DSH 装载插件前会跑 `evaluatePluginCompatibility()`：**只要声明了 `engines.dsh` 就只认它**
+（`peerDependencies` 里那些 `@deepseek-ai/dsh-*` 会被忽略），比较时带 `includePrerelease: true`。
+所以把上界钉成 `<0.2.2-0` 这种形式，等于每次 DSH 发新 rc 都把插件判成不兼容 —— 这正是 `0.1.0`
+在 `0.2.2-rc.1` 上装不上的原因。
+
+`0.1.1` 起：
+
+```json
+"engines": { "node": ">=18", "dsh": ">=0.2.0-rc.2 <0.3.0-0" }
+```
+
+覆盖 `0.2.0-rc.2` → `0.2.9`（含全部 alpha / rc）。DSH 侧的实际 API 契约在 `0.2.1-rc.5 → 0.2.2-rc.1`
+之间没有变化，已逐项比对：`sessionController.list/prompt/cancel`、`SessionSummary` 字段、
+`SessionPromptRequest`、`sessionQuery.readSession`、`tokenUsage` / `contextPressure` / `title` /
+`sessionListMetadata` / `modelSelection` 五个 projection 的 wire 视图、`webServer.register`、
+`tools.register`、`dsh.client` 清单字段、`sidebar.panellist` 与 `main` 两个槽位。
+
+仓库里带了一个不依赖第三方包的复刻脚本 `tools/compat-check.mjs`，可以直接对 `package.json` 跑一遍同样的判定：
+
+```bash
+node tools/compat-check.mjs package.json
+# dsh-session-console@0.1.1  engines.dsh = ">=0.2.0-rc.2 <0.3.0-0"
+#   dsh 0.2.2-rc.1      compatible
+#   ...
+# ALL_COMPATIBLE
+```
+
 
 ## 发布状态
 
 | 渠道 | 状态 |
 | --- | --- |
 | 源码仓库 | ✅ <https://github.com/onlyinliu/dsh-session-console>（10 个文件在 `main`，topics 含 `dsh-plugin`） |
-| npm | ✅ `dsh-session-console@0.1.0`，2026-11-04 发布 — <https://www.npmjs.com/package/dsh-session-console> |
+| npm | ✅ `dsh-session-console@0.1.1`（2026-11-04，兼容性修复）— <https://www.npmjs.com/package/dsh-session-console> |
 | 插件市场条目 | 🕒 PR <https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/11917>（已提交，等 CI 的"仓库满 1 天"这一条自动放行） |
 
 ### 市场 CI 的「仓库年龄」不是错误
@@ -161,3 +195,10 @@ dsh-session-console/
 - 指点只做字面 + 模糊匹配，不做语义 embedding；说「那个改权限的」这类纯意译会落到候选列表让你确认，而不是硬猜。
 - 冷会话的第一条派发会触发 resume，可能有一两秒延迟。
 - 有些历史会话来自别的机器（`cwd` 指向 `/home/deep/...` 这类本机不存在的路径），它们能读、能显示，但派进去会立刻 `turn/end: blocked`。这类会话在列表里用「空会话 / 冷会话」过滤器可以分开看。
+
+## 版本记录
+
+| 版本 | 变更 |
+| --- | --- |
+| `0.1.1` | **兼容性修复**：`engines.dsh` 从 `>=0.2.0-rc.2 <0.2.2-0` 放宽到 `>=0.2.0-rc.2 <0.3.0-0`。原来那个上界会让 `0.2.2-alpha.3` / `0.2.2-rc.1` / `0.2.2` 全部被判为 `incompatible-version`，装不上。同时补了 `tools/compat-check.mjs`（复刻 DSH 的判定逻辑）并把兼容性说明写进 README。 |
+| `0.1.0` | 首个发布版：仪表盘 + 一句话指代 + 跨会话派任务 + 5 个 agent 工具。 |
