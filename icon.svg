@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" role="img" aria-label="Session Console">
+  <defs>
+    <linearGradient id="dscGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4F6EF7"/>
+      <stop offset="1" stop-color="#7C5CF6"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#dscGrad)"/>
+  <g stroke="#FFFFFF" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.96">
+    <path d="M14 38.5a18 18 0 1 1 36 0"/>
+    <path d="M32 30.5 41.5 21"/>
+  </g>
+  <circle cx="32" cy="30.5" r="4" fill="#FFFFFF"/>
+  <g stroke="#FFFFFF" stroke-width="3.1" stroke-linecap="round" opacity="0.6">
+    <path d="M14 47.5h36"/>
+  </g>
+</svg>
