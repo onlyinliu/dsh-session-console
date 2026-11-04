@@ -1,0 +1,91 @@
+{
+  "name": "dsh-session-console",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Session Console: a dashboard over every session in the sidebar, natural-language session targeting, and a dispatch entry that turns a sentence into a task on another conversation.",
+  "license": "MIT",
+  "author": "liutianqi",
+  "homepage": "https://github.com/onlyinliu/dsh-session-console#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onlyinliu/dsh-session-console.git"
+  },
+  "bugs": {
+    "url": "https://github.com/onlyinliu/dsh-session-console/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh-desktop",
+    "session",
+    "dashboard",
+    "session-manager",
+    "agent-teams"
+  ],
+  "main": "lib/index.js",
+  "icon": "./icon.svg",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json",
+    "./locale/en.json": "./locale/en.json",
+    "./locale/zh.json": "./locale/zh.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "locale/en.json",
+    "locale/zh.json",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=18",
+    "dsh": ">=0.2.0-rc.2 <0.2.2-0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1 || >=4.0.5-0 <5",
+    "@deepseek-ai/dsh-client-locale": ">=0.1.0-rc.6 <0.3.0-0",
+    "@deepseek-ai/dsh-client-runtime": ">=0.1.0-rc.6 <0.3.0-0",
+    "react": "^18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-locale": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-runtime": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  }
+}
