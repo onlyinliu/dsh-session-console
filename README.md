@@ -46,80 +46,73 @@ DeepSeek Harness 的「左侧对话管理员」。侧栏多一个图标，点开
 
 ## 安装
 
+已发布到 npm：
+
 ```bash
-# 本地目录（开发时）
-plugin_manager install_bundle  target=D:\create\dsh-session-console
-
-# 从 GitHub 装（npm 发出来之前也能用）
-plugin_manager install_bundle  target=github:onlyinliu/dsh-session-console
-
-# npm 发布之后
 plugin_manager install_bundle  target=dsh-session-console
 ```
 
-装完重开一次 DSH（或关掉再打开插件），侧栏才会出现图标。
-
-## 发布状态与后续步骤
-
-**当前进度**
-
-| 事项 | 状态 |
-| --- | --- |
-| 源码仓库 | ✅ https://github.com/onlyinliu/dsh-session-console（10 个文件已在 `main`，已加 topic `dsh-plugin`） |
-| 插件市场条目 PR | ✅ https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/11917（`data/plugins/onlyinliu__dsh-session-console.yml`，1 commit / 1 file） |
-| npm 发布 | ⏸ 待完成：npm 账号开了 2FA，当前 access token 的 `bypass_2fa` 为 `false`，发布被 403 拒绝（见下） |
-
-插件市场（dsh-market）**本身不是插件目录**，列表来自精选仓库
-[awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)，
-所以「发布」是三件事：**建仓 → 发 npm → 给精选列表提一个 YAML 的 PR**。前两步已完成，只剩 npm。
-
-### 继续发 npm（需要一个人工动作）
-
-拿到的 token 形如 `npm_xxx`，查询其属性会看到 `bypass_2fa: false`。发布时报的是：
-
-```
-npm error 403 Forbidden - PUT https://registry.npmjs.org/dsh-session-console
-npm error Two-factor authentication or granular access token with bypass 2fa enabled is required to publish packages.
-```
-
-两条出路，任选其一：
-
-1. **推荐**：在 https://www.npmjs.com/settings/onlyinliu7/tokens 新建 Granular Access Token，
-   勾上 **Bypass 2FA**，权限给 `Read and write`，把值贴回来即可（本机可写入 `~/.dsh-cred/npm-token`）。
-2. 或者提供一次 TOTP 六位码，用 `npm publish --otp=<code>` 发（码 30 秒过期，时效紧）。
-
-发布命令（本机 `~/.npmrc` 的默认 registry 是只读镜像 `registry.npmmirror.com`，必须显式指定官方源）：
+也可以直接从 GitHub 装：
 
 ```bash
-npm publish --registry=https://registry.npmjs.org --access public
+plugin_manager install_bundle  target=github:onlyinliu/dsh-session-console
 ```
 
-`npm pack --dry-run` 的产物是 9 个文件 / 32.5 kB，只含 `lib/`、`locale/`、`icon.svg`、
-`cordis.patch.yml`、README、LICENSE。
+开发时从本地目录装（改动即时生效）：
 
-> 包名 `dsh-session-console` 已在 registry 上确认可用（返回 404）；原计划用的
-> `dsh-session-admin` 早在 2026-08 就被别人（`jemius`）占用，所以改了名。
+```bash
+plugin_manager install_bundle  target=D:\create\dsh-session-console
+```
 
-### 市场条目（已提交）
+装完重开一次 DSH，侧栏才会出现图标。
 
-`data/plugins/onlyinliu__dsh-session-console.yml` 的内容就是
-`D:\create\publish\dsh-session-console.yml`，要点：
+## 发布状态
 
-- `description.en` 必填、以句号结尾；含 `: `（冒号+空格）时必须整段加引号。
-- 一个 PR 最多 3 条；CI 依次查条目数 → `package.json` 的 `dsh.bundle` → 仓库年龄（满 1 天）→ lint 与站点构建。
-- **只声明 `dsh.client` 会被拒**——本包已同时声明 `dsh.bundle.patch`，满足条件。
-- 条目里**不要**手写 `npm:` 键，映射由站点自动采集。
-- 仓库创建于 2026-11-04，CI 的「满 1 天」年龄门槛会在次日自动放行（它会自己重跑，**不需要**关掉 PR 重开）。
+| 渠道 | 状态 |
+| --- | --- |
+| 源码仓库 | ✅ <https://github.com/onlyinliu/dsh-session-console>（10 个文件在 `main`，topics 含 `dsh-plugin`） |
+| npm | ✅ `dsh-session-console@0.1.0`，2026-11-04 发布 — <https://www.npmjs.com/package/dsh-session-console> |
+| 插件市场条目 | 🕒 PR <https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/11917>（已提交，等 CI 的"仓库满 1 天"这一条自动放行） |
 
-### 本机前置条件
+### 市场 CI 的「仓库年龄」不是错误
+
+`awesome-dsh-plugin` 的 `scripts/check-submission.mjs` 里有 `MIN_AGE_DAYS = 1`：仓库创建不满 1 天直接判失败。
+报错文案明说这是唯一失败项、检查会自己重跑放行，**不需要重新提交、push 或关了重开**。
+本仓库 `created_at = 2026-11-04T07:19Z`，所以 2026-11-05T07:19Z 之后的 CI 就会绿。
+
+### 以后发新版本
+
+1. 改 `package.json` 的 `version`；
+2. 发布必须用**勾了 Bypass 2FA 的 Granular Access Token**（这类 token 直接 publish 仍可用到 2027-01，之后要迁 trusted publishing）：
+
+```bash
+printf 'registry=https://registry.npmjs.org/\n//registry.npmjs.org/:_authToken=npm_xxx\n' > /tmp/rc
+npm publish --userconfig /tmp/rc --registry=https://registry.npmjs.org --access public
+```
+
+> 本机 `~/.npmrc` 的默认 registry 是 `registry.npmmirror.com`（只读镜像，**不能 publish**），
+> 所以必须显式带 `--registry=https://registry.npmjs.org`。
+> 发布返回 `202` 后，版本元数据先出现、tarball 在 CDN 上还有几秒到几十秒延迟，属正常。
+
+3. 把源码同步到 GitHub。本机到 `github.com:443` 的 git 连接不稳定（`Recv failure: Connection was reset`），
+   可以改用 REST Contents API 逐文件 `PUT /repos/<owner>/dsh-session-console/contents/<path>` 推送。
+
+### 市场条目规则（已按此写好并提 PR）
+
+- 文件位置 `data/plugins/<owner>__<repo>.yml`，一个插件一个文件；README 是生成的，**别手改**。
+- `description.en` 必填、以句号结尾；含 `: `（冒号+空格）要整段加引号。
+- CI 依次查：条目数（一个 PR 最多 3 条）→ `package.json` 必须声明 `dsh.bundle`（**只声明 `dsh.client` 会被拒**）→ 仓库满 1 天 → lint 与站点构建。
+- 条目里**不要**手写 `npm:` 键，映射由站点自动采集；npm 包的 `repository` 必须指回列表里的仓库。
+- 合并后站点与 dsh-market 通常一天内收录。
+
+## 本机前置条件
 
 | 项 | 现状 |
 | --- | --- |
 | `git` | 2.56.0 ✅ |
 | `npm` / `node` | 10.8.2 / v20.19.6 ✅ |
-| `gh` CLI | ❌ 未安装（不需要：GitHub 建仓与提 PR 已用 REST API 完成） |
-| GitHub 凭据 | ✅ OAuth token 在 `~/.dsh-cred/github-oauth-token`（device flow 取得，scope `repo,read:org`） |
-| npm 凭据 | ⚠️ token 存在 `~/.dsh-cred/npm-token`，但 `bypass_2fa: false`，需按上文换一个 |
+| `gh` CLI | ❌ 未安装 —— 建仓走了 GitHub Device Flow + REST API，不需要它 |
+| 发布凭据 | 不在仓库里：GitHub 用 device flow 换的 OAuth token，npm 用勾了 Bypass 2FA 的 Granular Token |
 
 ## 结构
 
