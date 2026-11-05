@@ -105,6 +105,39 @@ node tools/compat-check.mjs package.json
 ```
 
 
+## 升级（已经装过旧版）
+
+DSH 对"升级"分两条路，取决于当初是怎么装的：
+
+| 当初的装法 | 有没有「更新」按钮 | 怎么升 |
+| --- | --- | --- |
+| 包名 `dsh-session-console`（走 npm 注册表） | 有 | 设置 → 插件 → 点开条目 → 详情页头部的「更新到 x.y.z」或下方的「版本」区块 |
+| 本地目录 / `link:` / `github:` / tarball | 没有 | 先「移除」，再重新「添加插件」 |
+
+判定规则在 `@deepseek-ai/dsh-plugin-manager` 的 `updateRefusal()`：只有"第三方、装在 profile 里、
+以**注册表 spec（自身包名）**保存、清单里有 semver 版本、且不承载插件管理"的包才会被标成可更新。
+
+三个容易踩的点：
+
+- **写精确版本也绕不过去**：已装同名包时 `install_bundle` 直接按包名报 `already-installed`
+  （官方文案："to install another version, call remove_bundle first, then install_bundle again"）。
+  所以要么用 GUI 的「更新」，要么先移除再装。
+- **更新是「先卸后装」**：Host 先移除已装版本让插件停下，再按 `name@version` 装回去。
+  目标版本不存在、没声明 `dsh.bundle`、或 `engines.dsh` 不接受当前 DSH 时，更新在检查阶段就被拒，
+  profile 不变；装到一半失败会把原版本装回来。
+- 本机这种 `link:` 开发安装没有「更新」入口，改完目录里的文件重载插件
+  （`set_plugin enabled=false` → `true`）或重启 DSH 即可。
+
+Agent / 命令行侧没有 update 动作，等价操作是：
+
+```
+plugin_manager action=remove_bundle  target=dsh-session-console
+plugin_manager action=install_bundle target=dsh-session-console
+```
+
+写包名就会拿到 `latest`（现在是 `0.1.1`）；**不要**写 `0.1.0`，那一版的 `engines.dsh` 上界太窄，
+会被判 `incompatible-version`。
+
 ## 发布状态
 
 | 渠道 | 状态 |
