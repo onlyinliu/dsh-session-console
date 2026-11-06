@@ -144,13 +144,34 @@ plugin_manager action=install_bundle target=dsh-session-console
 | --- | --- |
 | 源码仓库 | ✅ <https://github.com/onlyinliu/dsh-session-console>（10 个文件在 `main`，topics 含 `dsh-plugin`） |
 | npm | ✅ `dsh-session-console@0.1.1`（2026-11-04，兼容性修复）— <https://www.npmjs.com/package/dsh-session-console> |
-| 插件市场条目 | 🕒 PR <https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/11917>（已提交，等 CI 的"仓库满 1 天"这一条自动放行） |
+| 插件市场条目 | ✅ 已上架 — <https://awesome-dsh-plugin.com/p/onlyinliu/dsh-session-console/>（PR [#11917](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/11917) 于 2026-11-05T20:21Z 合并） |
 
 ### 市场 CI 的「仓库年龄」不是错误
 
 `awesome-dsh-plugin` 的 `scripts/check-submission.mjs` 里有 `MIN_AGE_DAYS = 1`：仓库创建不满 1 天直接判失败。
 报错文案明说这是唯一失败项、检查会自己重跑放行，**不需要重新提交、push 或关了重开**。
-本仓库 `created_at = 2026-11-04T07:19Z`，所以 2026-11-05T07:19Z 之后的 CI 就会绿。
+本仓库 `created_at = 2026-11-04T07:19Z`，2026-11-05T18:47Z 的重跑就自动转绿，随后 PR 被合并。
+
+### 上架后 npm 字段还是 null？
+
+站点上的 `npm` / `version` 来自 `data/npm-map.json`，而那是**探针产物**（`scripts/probe-npm.mjs`），
+用 `raw.githubusercontent.com` 读仓库 `package.json`、再核对 `registry.npmjs.org` 里该包的 `repository`
+是否指回同一仓库。`data/npm-map.json` 被 gitignore、只在 CI 缓存里存在，所以：
+
+- **push 触发**的 `build-site` 是增量模式：它只在 `data/npm-map.json` 缺失或为空时才全量探针；
+  命中缓存时只跑 `probe-tarballs` / `probe-capabilities` 等少数几步，新条目的 `npm` 会短暂为 `null`。
+- **schedule（`cron: '23 2 * * *'`）与 workflow_dispatch** 才 `full_probe=1`，把所有条目重探一遍。
+
+本次合并后推送触发的构建确实留下了 `"npm": null` / `"version": null`，
+下一次夜间构建（UTC 02:23）会自动补上；期间条目功能完全正常，只是安装命令显示成
+`dsh plugin --profile web add github:onlyinliu/dsh-session-console` 而不是包名。
+
+### 国内区域为什么慢半拍
+
+`dsh-market` 在中国大陆区域优先读 npm 包 `dsh-plugin-catalog`，而它只在 `build-site` 的
+`schedule` / `workflow_dispatch` 分支发布（`if: github.event_name == 'schedule' || ...`）。
+所以国内目录最迟滞后到次日夜间。急着看可以到「市场设置 → 下载区域」切「全球」，
+或直接把安装源写成 npm 官方源。
 
 ### 以后发新版本
 
